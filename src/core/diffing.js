@@ -1,13 +1,16 @@
 import render from "./render";
+const isStringOrNumber = (value) =>
+  typeof value === "string" || typeof value === "number";
 
 const diff = (oldTree, newTree) => {
+  console.log({ oldTree, newTree });
   if (!newTree) {
     return (node) => {
       node.remove();
       return;
     };
   }
-  if (typeof oldTree === "string" || typeof newTree === "string") {
+  if (isStringOrNumber(oldTree) || isStringOrNumber(newTree)) {
     if (oldTree === newTree) {
       return (node) => node;
     } else {
@@ -27,7 +30,7 @@ const diff = (oldTree, newTree) => {
   const children = diffChildren(oldTree.children, newTree.children);
   return (node) => {
     const newNode = render(newTree, node);
-    props(newNode);
+    attributes(newNode);
     children(newNode);
     return newNode;
   };
@@ -41,29 +44,42 @@ const diffAttributes = (oldAttributes, newAttributes) => {
     }
   }
   return (node) => {
-    for (const key of patches) {
-      const value = patches[key];
-      node.setAttribute(key, value);
+    if (Object.keys(patches).length > 0) {
+      for (const key of patches) {
+        const value = patches[key];
+        node.setAttribute(key, value);
+      }
     }
     return node;
   };
 };
 
 const diffChildren = (oldChildren, newChildren) => {
-  const children = [];
-  for (let i = 0; i < newChildren.length; i++) {
-    const newChild = newChildren[i];
-    const oldChild = oldChildren[i];
-    const diffFn = diff(oldChild, newChild);
-    if (diffFn) {
-      children.push(diffFn);
-    }
+  console.log(oldChildren, newChildren);
+  const childPatches = [];
+  oldChildren.forEach((oldChild, i) => {
+    childPatches.push(diff(oldChild, newChildren[i]));
+  });
+
+  const additionalPatches = [];
+  for (const additionalChild of newChildren.slice(oldChildren.length)) {
+    additionalPatches.push(($node) => {
+      $node.appendChild(render(newChildren));
+      return $node;
+    });
   }
-  return (node) => {
-    for (const child of children) {
-      child(node);
+
+  return ($parent) => {
+    // since childPatches are expecting the $child, not $parent,
+    // we cannot just loop through them and call patch($parent)
+    $parent.childNodes.forEach(($child, i) => {
+      childPatches[i]($child);
+    });
+
+    for (const patch of additionalPatches) {
+      patch($parent);
     }
-    return node;
+    return $parent;
   };
 };
 
