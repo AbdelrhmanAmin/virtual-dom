@@ -3,7 +3,6 @@ const isStringOrNumber = (value) =>
   typeof value === "string" || typeof value === "number";
 
 const diff = (oldTree, newTree) => {
-  console.log({ oldTree, newTree });
   if (!newTree) {
     return (node) => {
       node.remove();
@@ -55,31 +54,27 @@ const diffAttributes = (oldAttributes, newAttributes) => {
 };
 
 const diffChildren = (oldChildren, newChildren) => {
-  console.log(oldChildren, newChildren);
-  const childPatches = [];
+  const parentPatches = [],
+    childPatches = [];
   oldChildren.forEach((oldChild, i) => {
-    childPatches.push(diff(oldChild, newChildren[i]));
+    const patch = diff(oldChild, newChildren[i]);
+    childPatches.push(patch);
   });
-
-  const additionalPatches = [];
-  for (const additionalChild of newChildren.slice(oldChildren.length)) {
-    additionalPatches.push(($node) => {
-      $node.appendChild(render(newChildren));
-      return $node;
+  const theNewChildren = newChildren.slice(oldChildren.length);
+  theNewChildren.forEach((newChild) => {
+    parentPatches.push((node) => {
+      node.appendChild(render(newChild));
+      return node;
     });
-  }
-
-  return ($parent) => {
-    // since childPatches are expecting the $child, not $parent,
-    // we cannot just loop through them and call patch($parent)
-    $parent.childNodes.forEach(($child, i) => {
-      childPatches[i]($child);
+  });
+  return (parent) => {
+    parent.childNodes.forEach((child, i) => {
+      childPatches[i](child);
     });
-
-    for (const patch of additionalPatches) {
-      patch($parent);
-    }
-    return $parent;
+    parentPatches.forEach((patch) => {
+      patch(parent);
+    });
+    return parent;
   };
 };
 

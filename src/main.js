@@ -25,4 +25,4 @@ setTimeout(() => {
   let newApp = createApp(2);
   const patch = diff(oldApp, newApp);
   app = patch(app);
-}, 1000);
+}, 3000);
