@@ -1,4 +1,5 @@
 import createElement from "./core/createElement";
+import render from "./core/render";
 const vApp = Object.create(null);
 Object.assign(
   vApp,
@@ -13,4 +14,5 @@ Object.assign(
   ])
 );
 
-console.log(vApp);
+const app = render(vApp);
+document.body.appendChild(app);
