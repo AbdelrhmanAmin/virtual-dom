@@ -1,7 +1,7 @@
-const createElement = (tag, props, ...children) => {
+const createElement = (tag, attributes, ...children) => {
   return {
     tag,
-    props: props || {},
+    attributes: attributes || {},
     children: children.flat() || [],
   };
 };

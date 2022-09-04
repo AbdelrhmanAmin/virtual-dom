@@ -1,8 +1,8 @@
-const renderElement = ({ tag, props, children }) => {
+const renderElement = ({ tag, attributes, children }) => {
   const $el = document.createElement(tag);
-  if (props) {
-    Object.keys(props).forEach((key) => {
-      const value = props[key];
+  if (attributes) {
+    Object.keys(attributes).forEach((key) => {
+      const value = attributes[key];
       if (key === "style") {
         Object.keys(value).forEach((styleKey) => {
           $el.style[styleKey] = value[styleKey];
