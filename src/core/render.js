@@ -22,11 +22,17 @@ const renderElement = ({ tag, props, children }) => {
   return $el;
 };
 
-const render = (vNode) => {
+const render = (vNode, target) => {
+  let node;
   if (typeof vNode === "string" || typeof vNode === "number") {
-    return document.createTextNode(vNode);
+    node = document.createTextNode(vNode);
+  } else {
+    node = renderElement(vNode);
   }
-  return renderElement(vNode);
+  if (target) {
+    target.replaceWith(node);
+  }
+  return node;
 };
 
 export default render;

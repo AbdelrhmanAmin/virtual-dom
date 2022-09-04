@@ -14,5 +14,4 @@ Object.assign(
   ])
 );
 
-const app = render(vApp);
-document.body.appendChild(app);
+render(vApp, document.getElementById("app"));
